@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+
+  eventbroker:
+    build:
+      context: https://github.com/senti-iot/senti-eventbroker.git#docker
+      dockerfile: Dockerfile

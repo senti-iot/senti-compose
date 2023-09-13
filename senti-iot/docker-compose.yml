@@ -1,0 +1,37 @@
+version: '3.8'
+
+networks:
+  network:
+
+volumes:
+  db_data:
+
+services:
+
+  db:
+    image: mariadb
+    container_name: sentidb
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - network
+    environment:
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+
+  eventbroker:
+    image: senti-iot/eventbroker
+    container_name: eventbroker
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - ./eventbroker/.env:/usr/src/app/.env
+    networks:
+      - network
