@@ -5,6 +5,8 @@ networks:
 
 volumes:
   db_data:
+  mqtt_data:
+  mqtt_log:
 
 services:
 
@@ -17,15 +19,39 @@ services:
         max-size: 10m
     volumes:
       - db_data:/var/lib/mysql
+      - ./mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - network
     environment:
       - MARIADB_USER=${MARIADB_USER}
       - MARIADB_PASSWORD=${MARIADB_PASSWORD}
       - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=sentievent
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    mem_limit: 2G
+    logging:
+      options:
+        max-size: 10m
+    networks:
+      - network
+    expose:
+      - 80
+    volumes:
+      - mqtt_data:/mosquitto/data/
+      - mqtt_log:/mosquitto/log
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/www:/mosquitto/www:ro
+
 
   eventbroker:
     image: senti-iot/eventbroker
+    build:
+      context: https://github.com/senti-iot/senti-eventbroker.git#v1config
+      dockerfile: Dockerfile
     container_name: eventbroker
     restart: unless-stopped
     logging:
