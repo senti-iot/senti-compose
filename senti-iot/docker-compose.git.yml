@@ -4,5 +4,5 @@ services:
 
   eventbroker:
     build:
-      context: https://github.com/senti-iot/senti-eventbroker.git#docker
+      context: https://github.com/senti-iot/senti-eventbroker.git#v1config
       dockerfile: Dockerfile

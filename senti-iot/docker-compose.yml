@@ -49,9 +49,7 @@ services:
 
   eventbroker:
     image: senti-iot/eventbroker
-    build:
-      context: https://github.com/senti-iot/senti-eventbroker.git#v1config
-      dockerfile: Dockerfile
+    # See ./docker-compose.git.yml for images not (yet) published to Docker Hub
     container_name: eventbroker
     restart: unless-stopped
     logging:
