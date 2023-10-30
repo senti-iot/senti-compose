@@ -1,5 +1,9 @@
 version: '3.8'
 
+volumes:
+  traefik-letsencrypt:
+  traefik-tmp:
+
 services:
   traefik:
     image: traefik:2.10
