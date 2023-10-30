@@ -62,3 +62,14 @@ services:
       - traefik.http.routers.mosquitto.tls=true
       - traefik.http.routers.mosquitto.tls.certResolver=letsEncrypt
 
+  eventbroker:
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.eventbrokerM1.compress=true
+      - traefik.http.middlewares.eventbrokerM2.headers.forceSTSHeader=true
+      - traefik.http.middlewares.eventbrokerM2.headers.stsSeconds=31536000
+      - traefik.http.routers.eventbroker.middlewares=eventbrokerM1,eventbrokerM2
+      - traefik.http.routers.eventbroker.entryPoints=https
+      - traefik.http.routers.eventbroker.rule=Host(`eventbroker.${SERVER_DNS}`)
+      - traefik.http.routers.eventbroker.tls=true
+      - traefik.http.routers.eventbroker.tls.certResolver=letsEncrypt
