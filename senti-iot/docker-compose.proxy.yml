@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:2.10
+    container_name: traefik
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    ports:
+      - 80:80
+      - 443:443
+    expose:
+      - 8080
+    networks:
+      - network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-letsencrypt:/etc/traefik/acme
+      - traefik-tmp:/tmp
+    command:
+      - --global.sendAnonymousUsage
+      - --accesslog=true
+      - --api=true
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --log.level=INFO
+      - --entryPoints.http.address=:80
+      - --entryPoints.https.address=:443
+      - --entryPoints.http.http.redirections.entryPoint.to=https
+      - --entryPoints.http.http.redirections.entryPoint.scheme=https
+      - --certificatesResolvers.letsEncrypt.acme.storage=/etc/traefik/acme/acme.json
+      - --certificatesResolvers.letsEncrypt.acme.email=${ADMIN_EMAIL}
+      - --certificatesResolvers.letsEncrypt.acme.tlsChallenge=true
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.traefikM0.basicauth.users=${TRAEFIK_AUTH}
+      - traefik.http.middlewares.traefikM1.compress=true
+      - traefik.http.middlewares.traefikM2.headers.forceSTSHeader=true
+      - traefik.http.middlewares.traefikM2.headers.stsSeconds=31536000
+      - traefik.http.routers.api.middlewares=traefikM0,traefikM1,traefikM2
+      - traefik.http.routers.api.entryPoints=https
+      - traefik.http.routers.api.rule=Host(`traefik.${SERVER_DNS}`)
+      - traefik.http.routers.api.tls=true
+      - traefik.http.routers.api.tls.certResolver=letsEncrypt
+      - traefik.http.route
+
+  mqtt:
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.mosquittoM1.compress=true
+      - traefik.http.middlewares.mosquittoM2.headers.forceSTSHeader=true
+      - traefik.http.middlewares.mosquittoM2.headers.stsSeconds=31536000
+      - traefik.http.routers.mosquitto.middlewares=mosquittoM1,mosquittoM2
+      - traefik.http.routers.mosquitto.entryPoints=https
+      - traefik.http.routers.mosquitto.rule=Host(`mqtt.${SERVER_DNS}`)
+      - traefik.http.routers.mosquitto.tls=true
+      - traefik.http.routers.mosquitto.tls.certResolver=letsEncrypt
+
